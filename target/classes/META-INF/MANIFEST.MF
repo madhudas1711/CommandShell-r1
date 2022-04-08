@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1649309739038
+Build-Jdk: 1.8.0_292
+Built-By: cdap
+Bundle-ClassPath: .,lib/guava-19.0.jar
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: Example Action Plugin
+Bundle-SymbolicName: org.example.plugin.CommandShell
+Bundle-Version: 1.2.5.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Embed-Dependency: *;inline=false;scope=compile
+Embed-Directory: lib
+Embed-Transitive: true
+Embedded-Artifacts: lib/guava-19.0.jar;g="com.google.guava";a="guava";v=
+ "19.0"
+Export-Package: org.example.plugin;uses:="io.cdap.cdap.api.annotation,ja
+ vax.annotation,io.cdap.cdap.api.plugin,io.cdap.cdap.etl.api.action,org.
+ slf4j,io.cdap.cdap.etl.api";version="1.2.5.SNAPSHOT"
+Import-Package: io.cdap.cdap.api.annotation,io.cdap.cdap.api.plugin,io.c
+ dap.cdap.etl.api,io.cdap.cdap.etl.api.action,javax.annotation,org.slf4j
+ ;version="[1.7,2)",sun.misc
+Tool: Bnd-1.50.0

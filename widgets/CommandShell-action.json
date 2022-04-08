@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "spec-version": "1.4"
+  },
+  "configuration-groups": [
+    {
+      "label": "Configuration Options",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "An Example Option",
+          "name": "exampleConfigOption",
+          "widget-attributes": {
+            "placeholder": "This value is specified in the <project-root>/widgets/ExampleAction-action.json"
+          }
+        },
+          {
+          "widget-type": "textbox",
+          "label": "Command Prompt",
+          "name": "CommandConfigOption",
+          "widget-attributes": {
+            "placeholder": "Put the commands with ; separator"
+          }
+         }
+      ]
+    }
+  ],
+  "outputs": []
+}

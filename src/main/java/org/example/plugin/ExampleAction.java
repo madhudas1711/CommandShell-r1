@@ -32,6 +32,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
+import java.io.IOException;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+
 
 /**
  * Example Action Plugin - This example action plugin can be used as a starting point for
@@ -59,6 +70,7 @@ public class ExampleAction extends Action {
    * See {@link ExampleActionConfig} class at the bottom of this file for more details.
    */
   private final ExampleActionConfig config;
+  
 
   @VisibleForTesting
   public ExampleAction(ExampleActionConfig config) {
@@ -98,6 +110,33 @@ public class ExampleAction extends Action {
     context.getArguments().set("example.action.arg",
                                "This value can be used by other plugins in the Pipeline by " +
                                  "specifying ${example.action.arg}.");
+    try{
+    	String file_path = this.config.getTempLocation() + "/input.txt";
+    	List<String> CmdList = new ArrayList<String>();
+    	CmdList.add("sh");
+    	CmdList.add(this.config.getCommand());
+    	Process p = Runtime.getRuntime().exec(this.config.getCommand());
+    	
+    	/*
+    	ProcessBuilder pb = new ProcessBuilder(CmdList);
+    	
+    	p = pb.start();
+    	
+    	p.waitFor();*/
+    	
+    	FileWriter fw = new FileWriter(file_path);
+    	BufferedWriter output = new BufferedWriter(fw);
+    	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+    	BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));    	
+    	while (reader.ready()){
+    		output.write(reader.readLine());
+    	}    	    	
+    	//output.write(error.readLine());
+    	output.close();    	
+    }
+    catch(IOException e){
+    	e.getStackTrace();
+    }
   }
 
   /**
@@ -115,11 +154,34 @@ public class ExampleAction extends Action {
     @Macro
     @Description("Write your shell commands here with ; separation")    
     private String CommandConfigOption;
+    @Macro
+    @Description("Put either the temporary GCS bucket or the local temporary storage dir")    
+    private String tempLocationConfigOption;
 
     @VisibleForTesting
-    public ExampleActionConfig(@Nullable String exampleConfigOption, @Nullable String CommandConfigOption) {
+    public ExampleActionConfig(@Nullable String exampleConfigOption, String CommandConfigOption, String tempLocationConfigOption) {
       this.exampleConfigOption = exampleConfigOption;
       this.CommandConfigOption = CommandConfigOption;
+      this.tempLocationConfigOption = tempLocationConfigOption;
+      //ExampleActionConfig.CommandConfigOption = CommandConfigOption;
+      //this.setTempLocationConfigOption(tempLocationConfigOption);
+    }
+    
+    public ExampleActionConfig(){};
+    
+    public String getCommand() {
+    	return CommandConfigOption;
+    }
+    
+    public String getTempLocation(){
+    	return tempLocationConfigOption;
+    }
+    public void setCommand( String CommandConfigOption) {
+    	this.CommandConfigOption = CommandConfigOption;
+    }
+    
+    public void setTempLocation(String tempLocationConfigOption){
+    	this.tempLocationConfigOption = tempLocationConfigOption;
     }
 
     /**
@@ -138,6 +200,12 @@ public class ExampleAction extends Action {
             throw new IllegalArgumentException("The config value cannot contain the word 'test' for some reason.");
           }
         }
+      if (!containsMacro("tempLocationConfigOption") && !Strings.isNullOrEmpty(tempLocationConfigOption)) {
+          if (tempLocationConfigOption.contains("test")) {
+            throw new IllegalArgumentException("The config value cannot contain the word 'test' for some reason.");
+          }
+        }
     }
+	
   }
 }

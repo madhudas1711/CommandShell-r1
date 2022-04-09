@@ -21,6 +21,14 @@
           "widget-attributes": {
             "placeholder": "Put the commands with ; separator"
           }
+         },
+          {
+          "widget-type": "textbox",
+          "label": "Temp Location",
+          "name": "tempLocationConfigOption",
+          "widget-attributes": {
+            "placeholder": "Put either the temporary GCS bucket or the local temporary storage dir"
+          }
          }
       ]
     }

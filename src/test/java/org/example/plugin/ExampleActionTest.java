@@ -28,7 +28,7 @@ public class ExampleActionTest {
   // This is an example of how to test that your validate function is throwing the right exception.
   @Test(expected = IllegalArgumentException.class)
   public void testExamplePluginValidate() throws Exception {
-    ExampleAction.ExampleActionConfig config = new ExampleAction.ExampleActionConfig("test","test");
+    ExampleAction.ExampleActionConfig config = new ExampleAction.ExampleActionConfig("test","test","test");
     MockPipelineConfigurer configurer = new MockPipelineConfigurer(null);
     new ExampleAction(config).configurePipeline(configurer);
     new ExampleAction(config).run(new MockActionContext());

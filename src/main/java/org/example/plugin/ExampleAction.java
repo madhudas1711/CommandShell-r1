@@ -112,26 +112,18 @@ public class ExampleAction extends Action {
                                  "specifying ${example.action.arg}.");
     try{
     	String file_path = this.config.getTempLocation() + "/input.txt";
-    	List<String> CmdList = new ArrayList<String>();
-    	CmdList.add("sh");
-    	CmdList.add(this.config.getCommand());
-    	Process p = Runtime.getRuntime().exec(this.config.getCommand());
     	
-    	/*
-    	ProcessBuilder pb = new ProcessBuilder(CmdList);
+    	Process p = Runtime.getRuntime().exec(new String[]{"sh","-c",this.config.getCommand()});    	
     	
-    	p = pb.start();
-    	
-    	p.waitFor();*/
-    	
-    	FileWriter fw = new FileWriter(file_path);
+    	FileWriter fw = new FileWriter(file_path,true); //append mode=true
     	BufferedWriter output = new BufferedWriter(fw);
     	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
     	BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));    	
-    	while (reader.ready()){
+    	while ((reader.ready())){
     		output.write(reader.readLine());
+    		output.newLine();    		
     	}    	    	
-    	//output.write(error.readLine());
+    	output.write(";Error = " + error.readLine());
     	output.close();    	
     }
     catch(IOException e){

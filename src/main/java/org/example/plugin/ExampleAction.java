@@ -118,12 +118,16 @@ public class ExampleAction extends Action {
     	FileWriter fw = new FileWriter(file_path,true); //append mode=true
     	BufferedWriter output = new BufferedWriter(fw);
     	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    	BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));    	
-    	while ((reader.ready())){
+    	BufferedReader stderror = new BufferedReader(new InputStreamReader(p.getErrorStream()));    	
+    	while ((reader.readLine() != null)){
     		output.write(reader.readLine());
     		output.newLine();    		
-    	}    	    	
-    	output.write(";Error = " + error.readLine());
+    	} 
+    	output.write(";Error = ");
+    	while ((stderror.readLine() != null)){
+    		output.write(stderror.readLine());
+    		output.newLine();
+    	}
     	output.close();    	
     }
     catch(IOException e){

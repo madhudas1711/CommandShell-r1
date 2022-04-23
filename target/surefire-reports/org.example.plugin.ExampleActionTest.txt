@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
 Test set: org.example.plugin.ExampleActionTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.422 sec
-testExamplePluginValidate(org.example.plugin.ExampleActionTest)  Time elapsed: 0.421 sec
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.319 sec
+testExamplePluginValidate(org.example.plugin.ExampleActionTest)  Time elapsed: 0.318 sec

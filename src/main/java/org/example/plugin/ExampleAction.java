@@ -17,8 +17,34 @@
 // If you change this, make sure to update the exported-packages variable in the pom.xml file
 package org.example.plugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.cloud.ServiceOptions;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+
+
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
@@ -27,18 +53,8 @@ import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.PipelineConfigurer;
 import io.cdap.cdap.etl.api.action.Action;
 import io.cdap.cdap.etl.api.action.ActionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 
-import java.io.IOException;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 
 
@@ -111,24 +127,65 @@ public class ExampleAction extends Action {
                                "This value can be used by other plugins in the Pipeline by " +
                                  "specifying ${example.action.arg}.");
     try{
-    	String file_path = this.config.getTempLocation() + "/input.txt";
+    	//ProcessBuilder cmd = new ProcessBuilder("sh","-c",shell_output_file_cmd);
+    	//Process pcmd = cmd.start();
     	
-    	Process p = Runtime.getRuntime().exec(new String[]{"sh","-c",this.config.getCommand()});    	
+    	//Path currentRelativePath = Paths.get("");
+    	//String s = currentRelativePath.toAbsolutePath().toString();
+    	//String filePath_abs = s + "/output.txt";
+    	String filePath = new File(System.getProperty("user.home")) + "/output.txt";
+    	//String filePath = this.config.getTempLocation() + "output.txt";
     	
-    	FileWriter fw = new FileWriter(file_path,true); //append mode=true
-    	BufferedWriter output = new BufferedWriter(fw);
-    	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    	BufferedReader stderror = new BufferedReader(new InputStreamReader(p.getErrorStream()));    	
-    	while ((reader.readLine() != null)){
-    		output.write(reader.readLine());
+    	
+    	FileWriter fw = new FileWriter(filePath,true); //append mode=true
+    	BufferedWriter output = new BufferedWriter(fw);    	 
+    	
+    	//String gsutil_cp_cmd = "exec > $(pwd)/output.txt 2>&1;export HOME=$(pwd);" + this.config.getCommand() + ";gsutil cp ./output.txt gs://" + this.config.getTempLocation() + "/;";
+    	//String cp_cmd = "exec > $(pwd)/output.txt 2>&1;export HOME=$(pwd);" + this.config.getCommand() + ";cp ./output.txt " + this.config.getTempLocation() + ";";
+    	
+    	String cmd = this.config.getCommand() + ";";
+    	//ProcessBuilder pb = new ProcessBuilder("sh","-c",cmd);
+    	//pb.directory(new File(System.getProperty("user.home")));
+		Process p = Runtime.getRuntime().exec(new String[]{"sh","-c",cmd});
+		BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+    	BufferedReader stderror = new BufferedReader(new InputStreamReader(p.getErrorStream())); 
+    	String line;
+    	while ((line = reader.readLine()) != null){
+    		output.write(line);
     		output.newLine();    		
     	} 
     	output.write(";Error = ");
-    	while ((stderror.readLine() != null)){
-    		output.write(stderror.readLine());
+    	//output.write(";filePath_abs = " + filePath_abs);
+    	//output.write(";filePath_user = " + filePath_user);
+    	while ((line = stderror.readLine()) != null){
+    		output.write(line);
     		output.newLine();
-    	}
-    	output.close();    	
+    	}    		
+		output.close();     	
+    	
+    	if (Pattern.matches("^/[a-zA-Z0-9/-_]*", this.config.getTempLocation())){
+    		String cp_cmd = "cp " + filePath + " " + this.config.getTempLocation() + ";";
+    		Runtime.getRuntime().exec(new String[]{"sh","-c",cp_cmd});
+    		
+    		LOG.debug(String.format("File copied to GCS storage  %s successfully.", this.config.getCommand()));
+    	}else {
+    		//Process Pcp = Runtime.getRuntime().exec(new String[]{"sh","-c",gsutil_cp_cmd});
+    		
+    		String projectId = ServiceOptions.getDefaultProjectId();
+        	String bucketName = this.config.getTempLocation();
+        	String objectName = "output.txt";
+        	
+        	//Charset cs = Charset.forName("UTF-8"); 
+        	//File outpt = new File(filePath);
+        	
+        	Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+            BlobId blobId = BlobId.of(bucketName, objectName);
+            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+            storage.create(blobInfo, Files.readAllBytes(Paths.get(filePath))); 
+    		
+    		LOG.debug(String.format("File copied to file storage  %s successfully.", this.config.getCommand()));    		
+    	}     	
+    	
     }
     catch(IOException e){
     	e.getStackTrace();
